@@ -1,5 +1,16 @@
 version: '2.1'
 services:
+  sct-browser-frontend:
+    image: snomedstorm-browser-nginx:latest
+    container_name: snowstorm-nginx
+    ports:
+      - 80:80
+    networks:
+      - elastic
+    depends_on:
+      - snowstorm
+    mem_reservation: 4g
+
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:6.8.3
     container_name: elasticsearch
@@ -10,7 +21,7 @@ services:
     networks:
       elastic:
         aliases:
-         - es
+          - es
     healthcheck:
       test: ["CMD", "curl", "-f", "http://es:9200"]
       interval: 1s
@@ -29,7 +40,9 @@ services:
         condition: service_healthy
     entrypoint: java -Xms2g -Xmx4g -jar snowstorm.jar --elasticsearch.urls=http://es:9200
     networks:
-      - elastic
+      elastic:
+        aliases:
+          - snowstorm
     ports:
       - 8080:8080
 
